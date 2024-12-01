@@ -1,0 +1,6 @@
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat_BALD.Form1.resources
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat-BALD.csproj.GenerateResource.cache
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat-BALD.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat-BALD.AssemblyInfoInputs.cache
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat-BALD.AssemblyInfo.cs
+C:\Users\laszl\source\repos\szenzorhalozat-BALD\szenzorhalozat-BALD\obj\Debug\net8.0-windows\szenzorhalozat-BALD.csproj.CoreCompileInputs.cache
