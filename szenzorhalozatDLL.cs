@@ -1,41 +1,43 @@
-using System;
+Ôªøusing System;
 
-namespace szenzorhalozatDLL
+namespace SensorLibrary
 {
-    public class Szenzor
+    public class SensorDataEventArgs : EventArgs
     {
-        public int SensorId { get; set; }
-        public string SensorType { get; set; }
-        public double Value { get; private set; }
-        public DateTime Idopont { get; private set; }
+        public string SensorId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public double Value { get; set; }
+        public string Unit { get; set; }
+    }
 
-        public delegate void ThresholdExceededEventHandler(object sender, EventArgs e);
-        public event ThresholdExceededEventHandler KuszobTullepve;
+    public class Sensor
+    {
+        public string Id { get; private set; }
+        public string Parameter { get; private set; }
+        public string Unit { get; private set; }
 
-        private double Kuszob;
+        public event EventHandler<SensorDataEventArgs> OnDataGenerated;
 
-        public Szenzor(int sensorId, string sensorType, double kuszob)
+        private Random _random;
+
+        public Sensor(string id, string parameter, string unit)
         {
-            SensorId = sensorId;
-            SensorType = sensorType;
-            Kuszob = kuszob;
+            Id = id;
+            Parameter = parameter;
+            Unit = unit;
+            _random = new Random();
         }
 
-        public void MereseredmenyGeneralas()
+        public void GenerateData()
         {
-            Random random = new Random();
-            Value = Math.Round(random.NextDouble() * 100, 2); // VÈletlensz·m 0-100 kˆzˆtt
-            Idopont = DateTime.Now;
-
-            if (Value > Kuszob)
+            double value = _random.NextDouble() * 100; // V√©letlenszer≈± √©rt√©k 0-100 k√∂z√∂tt
+            OnDataGenerated?.Invoke(this, new SensorDataEventArgs
             {
-                KuszobTullepes();
-            }
-        }
-
-        protected virtual void KuszobTullepes()
-        {
-            KuszobTullepve?.Invoke(this, EventArgs.Empty);
+                SensorId = Id,
+                Timestamp = DateTime.Now,
+                Value = value,
+                Unit = Unit
+            });
         }
     }
 }
