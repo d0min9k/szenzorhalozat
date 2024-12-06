@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.IO;
 using Newtonsoft.Json;
 using SensorLibrary;
@@ -10,7 +9,7 @@ namespace SensorNetworkSimulation
 {
     class Program
     {
-        static List<SensorDataEventArgs> sensorDataList = new List<SensorDataEventArgs>();
+        static List<SensorDataEventArgs> SzenzorAdatLista = new List<SensorDataEventArgs>();
 
         static void Main(string[] args)
         {
@@ -18,16 +17,16 @@ namespace SensorNetworkSimulation
             InitializeDatabase();
 
             // Szenzorok inicializálása
-            List<Sensor> sensors = new List<Sensor>
+            List<Szenzor> sensors = new List<Szenzor>
             {
-                new Sensor("1", "Hőmérséklet", "°C"),
-                new Sensor("2", "Páratartalom", "%"),
-                new Sensor("3", "Vízmennyiség", "liter")
+                new Szenzor("1", "Hőmérséklet", "°C"),
+                new Szenzor("2", "Páratartalom", "%"),
+                new Szenzor("3", "Vízmennyiség", "liter")
             };
 
             foreach (var sensor in sensors)
             {
-                sensor.OnDataGenerated += Sensor_OnDataGenerated;
+                sensor.GenEsemeny += SzenzorokAdatai;
             }
 
             // Adatok generálása
@@ -36,23 +35,23 @@ namespace SensorNetworkSimulation
             {
                 foreach (var sensor in sensors)
                 {
-                    sensor.GenerateData();
+                    sensor.Adatfeltoltes();
                 }
                 System.Threading.Thread.Sleep(1000); // Várakozás
             }
 
             // Adatok JSON fájlba írása
-            WriteToJsonFile();
+            JsonFile();
 
             // LINQ lekérdezések
-            PerformLinqQueries();
+            Linq();
 
             Console.WriteLine("Szimuláció vége.");
         }
 
-        private static void Sensor_OnDataGenerated(object sender, SensorDataEventArgs e)
+        private static void SzenzorokAdatai(object sender, SensorDataEventArgs e)
         {
-            sensorDataList.Add(e);
+            SzenzorAdatLista.Add(e);
             SaveToDatabase(e);
         }
 
@@ -84,7 +83,7 @@ namespace SensorNetworkSimulation
                 VALUES (@SensorId, @Timestamp, @Value, @Unit);";
 
             using var command = new SQLiteCommand(insertQuery, connection);
-            command.Parameters.AddWithValue("@SensorId", data.SensorId);
+            command.Parameters.AddWithValue("@SensorId", data.Id);
             command.Parameters.AddWithValue("@Timestamp", data.Timestamp.ToString("o"));
             command.Parameters.AddWithValue("@Value", data.Value);
             command.Parameters.AddWithValue("@Unit", data.Unit);
@@ -92,38 +91,38 @@ namespace SensorNetworkSimulation
             command.ExecuteNonQuery();
         }
 
-        private static void WriteToJsonFile()
+        private static void JsonFile()
         {
-            string json = JsonConvert.SerializeObject(sensorDataList, Formatting.Indented);
-            File.WriteAllText("sensordata.json", json);
+            string json = JsonConvert.SerializeObject(SzenzorAdatLista, Formatting.Indented);
+            File.WriteAllText("szenzoradatok.json", json);
         }
 
-        private static void PerformLinqQueries()
+        private static void Linq()
         {
             // Példa LINQ lekérdezésekre
             Console.WriteLine("LINQ lekérdezések:");
 
             // 1. Átlagérték számítása szenzoronként
-            var averageValues = sensorDataList
-                .GroupBy(data => data.SensorId)
+            var averageValues = SzenzorAdatLista
+                .GroupBy(data => data.Id)
                 .Select(group => new
                 {
-                    SensorId = group.Key,
+                    Id = group.Key,
                     AverageValue = group.Average(data => data.Value)
                 });
 
             foreach (var result in averageValues)
             {
-                Console.WriteLine($"Szenzor {result.SensorId} átlagértéke: {result.AverageValue:F2}");
+                Console.WriteLine($"Szenzor {result.Id} átlagértéke: {result.AverageValue:F2}");
             }
 
             // 2. Legmagasabb mért érték
-            var maxValue = sensorDataList.Max(data => data.Value);
+            var maxValue = SzenzorAdatLista.Max(data => data.Value);
             Console.WriteLine($"Legmagasabb mért érték: {maxValue:F2}");
 
             // 3. Adatok időbélyeg szerinti rendezése
-            var sortedData = sensorDataList.OrderBy(data => data.Timestamp);
-            Console.WriteLine("Időbélyeg szerint rendezett adatok:");
+            var sortedData = SzenzorAdatLista.OrderBy(data => data.Timestamp);
+            Console.WriteLine("Mérések id szerint rendezett adatok:");
             foreach (var data in sortedData.Take(5))
             {
                 Console.WriteLine($"{data.Timestamp}: {data.Value} {data.Unit}");
