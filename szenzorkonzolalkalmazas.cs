@@ -5,11 +5,11 @@ using Newtonsoft.Json;
 using SensorLibrary;
 using System.Linq;
 
-namespace SensorNetworkSimulation
+namespace SzenzorHalozat    
 {
     class Program
     {
-        static List<SensorDataEventArgs> SzenzorAdatLista = new List<SensorDataEventArgs>();
+        static List<SensorDataEvents> SzenzorAdatLista = new List<SensorDataEvents>();
 
         static void Main(string[] args)
         {
@@ -17,23 +17,24 @@ namespace SensorNetworkSimulation
             InitializeDatabase();
 
             // Szenzorok inicializálása
-            List<Szenzor> sensors = new List<Szenzor>
+            List<Szenzor> szenzorok = new List<Szenzor>
             {
-                new Szenzor("1", "Hőmérséklet", "°C"),
-                new Szenzor("2", "Páratartalom", "%"),
-                new Szenzor("3", "Vízmennyiség", "liter")
+                new Szenzor("1", "Vízmagasság", "m"),
+                new Szenzor("2", "Vízmagasság", "m"),
+                new Szenzor("3", "Vízmagasság", "m")
             };
-
-            foreach (var sensor in sensors)
+            
+            foreach (var szenzor in szenzorok)  //Esemenykezeles
             {
-                sensor.GenEsemeny += SzenzorokAdatai;
+                szenzor.GenEsemeny += SzenzorokAdatai;
+                szenzor.NullErtekEsemeny += NullErtekGeneralva;     
             }
 
             // Adatok generálása
             Console.WriteLine("Adatok generálása folyamatban...");
             for (int i = 0; i < 10; i++)
             {
-                foreach (var sensor in sensors)
+                foreach (var sensor in szenzorok)
                 {
                     sensor.Adatfeltoltes();
                 }
@@ -47,12 +48,18 @@ namespace SensorNetworkSimulation
             Linq();
 
             Console.WriteLine("Szimuláció vége.");
+            Console.ReadKey();
         }
 
-        private static void SzenzorokAdatai(object sender, SensorDataEventArgs e)
+        private static void SzenzorokAdatai(object sender, SensorDataEvents e)
         {
             SzenzorAdatLista.Add(e);
             SaveToDatabase(e);
+        }
+
+        private static void NullErtekGeneralva(object sender, SensorDataEvents e)
+        {
+            Console.WriteLine($"Figyelem! A(z) {e.SzenzorId} szenzor 0 értéket mért: {e.Timestamp}");
         }
 
         private static void InitializeDatabase()
@@ -91,6 +98,7 @@ namespace SensorNetworkSimulation
             command.ExecuteNonQuery();
         }
 
+        //Json
         private static void JsonFile()
         {
             string json = JsonConvert.SerializeObject(SzenzorAdatLista, Formatting.Indented);
@@ -104,11 +112,11 @@ namespace SensorNetworkSimulation
 
             // 1. Átlagérték számítása szenzoronként
             var averageValues = SzenzorAdatLista
-                .GroupBy(data => data.Id)
+                .GroupBy(x => x.SzenzorId)
                 .Select(group => new
                 {
                     Id = group.Key,
-                    AverageValue = group.Average(data => data.Value)
+                    AverageValue = group.Average(x => x.Value)
                 });
 
             foreach (var result in averageValues)
@@ -117,15 +125,19 @@ namespace SensorNetworkSimulation
             }
 
             // 2. Legmagasabb mért érték
-            var maxValue = SzenzorAdatLista.Max(data => data.Value);
+            var maxValue = SzenzorAdatLista.Max(x => x.Value);
             Console.WriteLine($"Legmagasabb mért érték: {maxValue:F2}");
 
+            // 2. Legmagalacsonyabb mért érték
+            var minValue = SzenzorAdatLista.Max(x => x.Value);
+            Console.WriteLine($"Legmagalacsonyabb mért érték: {minValue:F2}");
+
             // 3. Adatok időbélyeg szerinti rendezése
-            var sortedData = SzenzorAdatLista.OrderBy(data => data.Timestamp);
+            var sortedData = SzenzorAdatLista.OrderBy(x => x.Timestamp);
             Console.WriteLine("Mérések id szerint rendezett adatok:");
-            foreach (var data in sortedData.Take(5))
+            foreach (var x in sortedData.Take(5))
             {
-                Console.WriteLine($"{data.Timestamp}: {data.Value} {data.Unit}");
+                Console.WriteLine($"{x.Timestamp}: {x.Value} {x.ME}");  
             }
         }
     }

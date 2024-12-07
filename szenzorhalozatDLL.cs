@@ -2,12 +2,12 @@
 
 namespace SensorLibrary
 {
-    public class SensorDataEventArgs : EventArgs
+    public class SensorDataEvents : EventArgs
     {
-        public string Id { get; set; }
+        public string SzenzorId { get; set; }
         public DateTime Timestamp { get; set; }
         public double Value { get; set; }
-        public string Unit { get; set; }
+        public string ME { get; set; }
     }
 
     public class Szenzor
@@ -16,7 +16,10 @@ namespace SensorLibrary
         public string Parameter { get; private set; }
         public string Unit { get; private set; }
 
-        public event EventHandler<SensorDataEventArgs> GenEsemeny;
+        public event EventHandler<SensorDataEvents> GenEsemeny;
+
+        public event EventHandler<SensorDataEvents> NullErtekEsemeny;
+     
 
         private Random _random;
 
@@ -30,14 +33,28 @@ namespace SensorLibrary
 
         public void Adatfeltoltes()
         {
-            double value = _random.NextDouble() * 100; // Véletlenszerű érték 0-100 között
-            GenEsemeny?.Invoke(this, new SensorDataEventArgs
+            double value = _random.NextDouble() * 10; // Véletlenszerű érték 0-10 között
+            if (value < 1e-6) // 0-hoz közeli érték esetén 0-nak tekintjük, a kódban az if (value < 1e-6) azt jelenti, hogy a feltétel igaz, ha a value változó értéke kisebb, mint 10 a -6-on
             {
-                Id = Id,
-                Timestamp = DateTime.Now,
-                Value = value,
-                Unit = Unit
-            });
+                value = 0;
+                NullErtekEsemeny?.Invoke(this, new SensorDataEvents
+                {
+                    SzenzorId = Id,
+                    Timestamp = DateTime.Now,
+                    Value = value,
+                    ME = Unit
+                });
+            }
+            else
+            {
+                GenEsemeny?.Invoke(this, new SensorDataEvents
+                {
+                    SzenzorId = Id,
+                    Timestamp = DateTime.Now,
+                    Value = value,
+                    ME = Unit
+                });
+            }
         }
     }
 }
