@@ -7,7 +7,7 @@ namespace SensorLibrary
         public string SzenzorId { get; set; }
         public DateTime Timestamp { get; set; }
         public double Value { get; set; }
-        public string ME { get; set; }
+        public string Unit { get; set; }
     }
 
     public class Szenzor
@@ -42,7 +42,7 @@ namespace SensorLibrary
                     SzenzorId = Id,
                     Timestamp = DateTime.Now,
                     Value = value,
-                    ME = Unit
+                    Unit = Unit
                 });
             }
             else
@@ -52,7 +52,7 @@ namespace SensorLibrary
                     SzenzorId = Id,
                     Timestamp = DateTime.Now,
                     Value = value,
-                    ME = Unit
+                    Unit = Unit
                 });
             }
         }
