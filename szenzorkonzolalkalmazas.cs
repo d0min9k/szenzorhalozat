@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 using System.IO;
 using Newtonsoft.Json;
 using SensorLibrary;
@@ -13,8 +14,6 @@ namespace SzenzorHalozat
 
         static void Main(string[] args)
         {
-            // Adatbázis inicializálása
-            InitializeDatabase();
 
             // Szenzorok inicializálása
             List<Szenzor> szenzorok = new List<Szenzor>
@@ -53,8 +52,8 @@ namespace SzenzorHalozat
 
         private static void SzenzorokAdatai(object sender, SensorDataEvents e)
         {
-            SzenzorAdatLista.Add(e);
-            SaveToDatabase(e);
+            SzenzorAdatLista.Add(e);           
+           
         }
 
         private static void NullErtekGeneralva(object sender, SensorDataEvents e)
@@ -62,40 +61,25 @@ namespace SzenzorHalozat
             Console.WriteLine($"Figyelem! A(z) {e.SzenzorId} szenzor 0 értéket mért: {e.Timestamp}");
         }
 
-        private static void InitializeDatabase()
+
+        void AdatbazisbaBeszur(string SzenzorId, DateTime Timestamp, double Value, string ME)
         {
-            using var connection = new SQLiteConnection("Data Source=sensordata.db;");
-            connection.Open();
+            string connectionString = "Server=localhost;Database=Szenzorhalozat;Uid=root;Pwd=root;"; // a localhoston root azonositoval es root jelszoval tud belepni a szenzorhalozat adatbazisba
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "INSERT INTO SzenzorokAdatai (SensorId, Timestamp, Value, Unit) VALUES (@SzenzorId, @Timestamp, @Value, @ME)";
 
-            string tableCreationQuery = @"
-                CREATE TABLE IF NOT EXISTS SensorData (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    SensorId TEXT,
-                    Timestamp TEXT,
-                    Value REAL,
-                    Unit TEXT
-                );";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@SzenzorId", SzenzorId);
+                    command.Parameters.AddWithValue("@MeresIdeje", Timestamp);
+                    command.Parameters.AddWithValue("@Ertek", Value);
+                    command.Parameters.AddWithValue("@Mertekegyseg", ME);
 
-            using var command = new SQLiteCommand(tableCreationQuery, connection);
-            command.ExecuteNonQuery();
-        }
-
-        private static void SaveToDatabase(SensorDataEventArgs data)
-        {
-            using var connection = new SQLiteConnection("Data Source=sensordata.db;");
-            connection.Open();
-
-            string insertQuery = @"
-                INSERT INTO SensorData (SensorId, Timestamp, Value, Unit)
-                VALUES (@SensorId, @Timestamp, @Value, @Unit);";
-
-            using var command = new SQLiteCommand(insertQuery, connection);
-            command.Parameters.AddWithValue("@SensorId", data.Id);
-            command.Parameters.AddWithValue("@Timestamp", data.Timestamp.ToString("o"));
-            command.Parameters.AddWithValue("@Value", data.Value);
-            command.Parameters.AddWithValue("@Unit", data.Unit);
-
-            command.ExecuteNonQuery();
+                    command.ExecuteNonQuery();
+                }
+            }
         }
 
         //Json
@@ -128,11 +112,11 @@ namespace SzenzorHalozat
             var maxValue = SzenzorAdatLista.Max(x => x.Value);
             Console.WriteLine($"Legmagasabb mért érték: {maxValue:F2}");
 
-            // 2. Legmagalacsonyabb mért érték
+            // 3. Legmagalacsonyabb mért érték
             var minValue = SzenzorAdatLista.Max(x => x.Value);
             Console.WriteLine($"Legmagalacsonyabb mért érték: {minValue:F2}");
 
-            // 3. Adatok időbélyeg szerinti rendezése
+            // 4. Adatok időbélyeg szerinti rendezése
             var sortedData = SzenzorAdatLista.OrderBy(x => x.Timestamp);
             Console.WriteLine("Mérések id szerint rendezett adatok:");
             foreach (var x in sortedData.Take(5))
