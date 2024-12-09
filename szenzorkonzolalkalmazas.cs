@@ -45,7 +45,8 @@ namespace SzenzorHalozat
             // LINQ lekérdezések
             Linq();
 
-            Console.WriteLine("Szimuláció vége.");           
+            Console.WriteLine("Szimuláció vége. Nyomj meg egy billentyűt a kilépéshez.");           
+            Console.ReadKey();
         }
 
         private static void SzenzorokAdatai(object sender, SensorDataEvents e)
