@@ -4,7 +4,7 @@ namespace SensorLibrary
 {
     public class SensorDataEvents : EventArgs
     {
-        public string SzenzorId { get; set; }
+        public string SensorId { get; set; }
         public DateTime Timestamp { get; set; }
         public double Value { get; set; }
         public string Unit { get; set; }
@@ -39,7 +39,7 @@ namespace SensorLibrary
                 value = 0;
                 NullErtekEsemeny?.Invoke(this, new SensorDataEvents
                 {
-                    SzenzorId = Id,
+                    SensorId = Id,
                     Timestamp = DateTime.Now,
                     Value = value,
                     Unit = Unit
@@ -49,7 +49,7 @@ namespace SensorLibrary
             {
                 GenEsemeny?.Invoke(this, new SensorDataEvents
                 {
-                    SzenzorId = Id,
+                    SensorId = Id,
                     Timestamp = DateTime.Now,
                     Value = value,
                     Unit = Unit

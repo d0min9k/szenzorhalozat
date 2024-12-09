@@ -19,8 +19,7 @@ namespace SzenzorHalozat
             List<Szenzor> szenzorok = new List<Szenzor>
             {
                 new Szenzor("1", "Vízszint", "m"),
-                new Szenzor("2", "Vízszint", "m"),
-                new Szenzor("3", "Vízszint", "m")
+                new Szenzor("2", "Vízszint", "m")         
             };
             
             foreach (var szenzor in szenzorok)  //Esemenykezeles
@@ -40,96 +39,47 @@ namespace SzenzorHalozat
                 System.Threading.Thread.Sleep(1000); // Várakozás
             }
 
-            try
-            {
-                AdatbazisInicializalasa();
-                TablaInicializalas();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Hiba történt: {ex.Message}");
-            }
-
             // Adatok JSON fájlba írása
             JsonFile();
 
             // LINQ lekérdezések
             Linq();
 
-            Console.WriteLine("Szimuláció vége.");
-            Console.ReadKey();
+            Console.WriteLine("Szimuláció vége.");           
         }
 
         private static void SzenzorokAdatai(object sender, SensorDataEvents e)
         {
             SzenzorAdatLista.Add(e);
-            AdatbazisbaBeszur(e.SzenzorId, e.Timestamp, e.Value, e.Unit);
+            AdatbazisbaBeszur(e.SensorId, e.Timestamp, e.Value, e.Unit);
         }
 
         private static void NullErtekGeneralva(object sender, SensorDataEvents e)
         {
-            Console.WriteLine($"Figyelem! A(z) {e.SzenzorId} szenzor 0 értéket mért: {e.Timestamp}");
-        }
-
-        public static void AdatbazisInicializalasa()
-        {
-            string connectionString = "Server=localhost;Uid=root;Pwd=root;"; // Adatbázis nélkül csatlakozunk
-            using (var connection = new MySqlConnection(connectionString))
-            {
-                connection.Open();
-
-                // Adatbázis létrehozása, ha nem létezik
-                string createDatabaseQuery = "CREATE DATABASE IF NOT EXISTS szenzorhalozat;";
-                using (var command = new MySqlCommand(createDatabaseQuery, connection))
-                {
-                    command.ExecuteNonQuery();
-                }
-            }
-        }
-
-        public static void TablaInicializalas()
-        {
-                            string connectionString = "Server=localhost;Database=szenzorhalozat;Uid=root;Pwd=root;";
-                            using (var connection = new MySqlConnection(connectionString))
-                            {
-                                connection.Open();
-
-                                // Tábla létrehozása, ha nem létezik
-                                string createTableQuery = @"
-                                CREATE TABLE IF NOT EXISTS szenzorokadatai (               
-                                SzenzorId VARCHAR(255),
-                                Timestamp DATETIME,
-                                Value DOUBLE,
-                                Unit VARCHAR(255)
-                                );
-                                ";
-                                using (var command = new MySqlCommand(createTableQuery, connection))
-                                {
-                                        command.ExecuteNonQuery();
-                                }
-                            }
+            Console.WriteLine($"Figyelem! A(z) {e.SensorId} szenzor 0 értéket mért: {e.Timestamp}");
         }
 
         public static void AdatbazisbaBeszur(string SzenzorId, DateTime Timestamp, double Value, string Unit)
-                      {
-                            string connectionString = "Server=localhost;Database=szenzorhalozat;Uid=root;Pwd=root;"; // a localhoston root azonositoval es root jelszoval tud belepni a szenzorhalozat adatbazisba
-                            using (var connection = new MySqlConnection(connectionString))
-                            {
-                                connection.Open();
-                                string query = "INSERT INTO szenzorokadatai (SensorId, Timestamp, Value, Unit) VALUES (@SensorId, @Timestamp, @Value, @Unit)";
+        {
+            string connectionString = "server=localhost;database=szenzorhalozat;user=root;password=root;"; // a localhoston root azonositoval es root jelszoval tud belepni a szenzorhalozat adatbazisba
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                string query = "INSERT INTO szenzorokadatai (SensorId, Timestamp, Value, MeasurementUnit) VALUES (@SensorId, @Timestamp, @Value, @Unit)";
 
-                                using (var command = new MySqlCommand(query, connection))
-                                {
-                                    command.Parameters.AddWithValue("@SensorId", SzenzorId);
-                                    command.Parameters.AddWithValue("@Timestamp", Timestamp);
-                                    command.Parameters.AddWithValue("@Value", Value);
-                                    command.Parameters.AddWithValue("@Unit", Unit);
 
-                                    command.ExecuteNonQuery();
-                                 }
-                            }
-                      }
+                using (var command = new MySqlCommand(query, connection))
+                {
+                command.Parameters.AddWithValue("@SensorId", SzenzorId);
+                command.Parameters.AddWithValue("@Timestamp", Timestamp);
+                command.Parameters.AddWithValue("@Value", Value);
+                command.Parameters.AddWithValue("@Unit", Unit);
 
+                command.ExecuteNonQuery();
+                }
+            }
+        }
+        
         //Json
         private static void JsonFile()
         {
@@ -144,7 +94,7 @@ namespace SzenzorHalozat
 
             // 1. Átlagérték számítása szenzoronként
             var averageValues = SzenzorAdatLista
-                .GroupBy(x => x.SzenzorId)
+                .GroupBy(x => x.SensorId)
                 .Select(group => new
                 {
                     Id = group.Key,
