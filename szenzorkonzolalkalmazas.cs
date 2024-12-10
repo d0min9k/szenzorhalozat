@@ -5,15 +5,20 @@ using System.IO;
 using Newtonsoft.Json;
 using SensorLibrary;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace SzenzorHalozat    
 {
     class Program
     {
+        [DllImport("kernel32.dll")]
+        static extern bool AllocConsole();
+
         static List<SensorDataEvents> SzenzorAdatLista = new List<SensorDataEvents>();
 
         static void Main(string[] args)
         {
+            AllocConsole();
 
             // Szenzorok inicializálása
             List<Szenzor> szenzorok = new List<Szenzor>
@@ -30,7 +35,7 @@ namespace SzenzorHalozat
 
             // Adatok generálása
             Console.WriteLine("Adatok generálása folyamatban...");
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 2; i++)
             {
                 foreach (var sensor in szenzorok)
                 {
@@ -112,12 +117,12 @@ namespace SzenzorHalozat
             Console.WriteLine($"Legmagasabb mért érték: {maxValue:F2}");
 
             // 3. Legmagalacsonyabb mért érték
-            var minValue = SzenzorAdatLista.Max(x => x.Value);
+            var minValue = SzenzorAdatLista.Min(x => x.Value);
             Console.WriteLine($"Legmagalacsonyabb mért érték: {minValue:F2}");
 
             // 4. Adatok időbélyeg szerinti rendezése
             var sortedData = SzenzorAdatLista.OrderBy(x => x.Timestamp);
-            Console.WriteLine("Mérések id szerint rendezett adatok:");
+            Console.WriteLine("Mérések időbélyeg szerint rendezett adatok:");
             foreach (var x in sortedData.Take(5))
             {
                 Console.WriteLine($"{x.Timestamp}: {x.Value} {x.Unit}");  

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("szenzorhalozat-BALD")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+aae3db8bcf31e03d7273a8bc57bb1f0434bc4ca7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5298eea50dcabacd54b125d3024e8c58479bea23")]
 [assembly: System.Reflection.AssemblyProductAttribute("szenzorhalozat-BALD")]
 [assembly: System.Reflection.AssemblyTitleAttribute("szenzorhalozat-BALD")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
